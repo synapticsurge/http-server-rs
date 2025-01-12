@@ -1,9 +1,6 @@
 use std::net::TcpListener;
 use std::{env, fs, thread};
-use std::{
-    io::prelude::*,
-    net::TcpStream,
-};
+use std::{io::prelude::*, net::TcpStream};
 
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:4221").unwrap();
@@ -21,7 +18,7 @@ fn main() {
 }
 
 fn handel_con(mut stream: TcpStream) {
-    let mut buff = [0;1024];
+    let mut buff = [0; 1024];
     let n = stream.read(&mut buff).unwrap();
     let request_string = String::from_utf8_lossy(&buff[..n]).into_owned();
     //println!("{:?}",request_string);
@@ -36,19 +33,19 @@ fn handel_con(mut stream: TcpStream) {
             user_agent = i.trim_start_matches("User-Agent: ");
         }
     }
-    let html =  fs::read_to_string("index.html").unwrap();
+    let html = fs::read_to_string("index.html").unwrap();
     if http_req[0].starts_with("GET") {
         if file_path == "/" {
             res = "HTTP/1.1 200 OK\r\n\r\n".to_string();
         }
-         if file_path.starts_with("/echo/") {
+        if file_path.starts_with("/echo/") {
             let name = file_path.trim_start_matches("/echo/");
             res = format!(
                 "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {}\r\n\r\n{}",
                 name.len(),
                 name
             );
-        } 
+        }
         if file_path == "/user-agent" {
             let name = user_agent;
             res = format!(
@@ -57,17 +54,15 @@ fn handel_con(mut stream: TcpStream) {
                 name
             );
         }
-         if http_req[0].starts_with("GET / ") {
+        if http_req[0].starts_with("GET / ") {
             let name = html;
             res = format!(
                 "HTTP/1.1 200 OK\r\nContent-Length: {}\r\n\r\n{}",
                 name.len(),
                 name
             );
-        
-            
         }
-         if file_path.starts_with("/files/") {
+        if file_path.starts_with("/files/") {
             let name = file_path.trim_start_matches("/files/");
             let dir_temp: Vec<_> = env::args().collect();
             let dir = &dir_temp[2];
@@ -87,8 +82,8 @@ fn handel_con(mut stream: TcpStream) {
         let name = file_path.trim_start_matches("/files/");
         let dir_temp: Vec<_> = env::args().collect();
         let dir = &dir_temp[2];
-        let data = http_req[http_req.len()-1];
-      let _ =fs::write(format!("{}/{}",dir,name), data);
+        let data = http_req[http_req.len() - 1];
+        let _ = fs::write(format!("{}/{}", dir, name), data);
 
         res = "HTTP/1.1 201 Created\r\n\r\n".to_string();
     }
